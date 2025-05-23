@@ -1,7 +1,11 @@
 import tkinter as tk
 import requests
+from dotenv import load_dotenv
+import os
 
-API_KEY = '11c39a505a13a6c2ed30715a46913087'  # Replace with your actual API key
+# Load environment variables from .env file
+load_dotenv()
+API_KEY = os.getenv('API_KEY')  # Get API key from environment
 
 def get_weather():
     city = city_entry.get()
@@ -9,24 +13,33 @@ def get_weather():
         root.destroy()
         return
 
-    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
+    if not API_KEY:
+        result = "Error: API Key not found. Check your .env file."
+    else:
+        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
 
-    try:
-        response = requests.get(url)
-        data = response.json()
+        try:
+            response = requests.get(url)
+            data = response.json()
 
-        if response.status_code == 200:
-            temp = data["main"]["temp"]
-            humidity = data["main"]["humidity"]
-            desc = data["weather"][0]["description"]
-            wind_speed = data["wind"]["speed"]
+            if response.status_code == 200:
+                temp = data["main"]["temp"]
+                humidity = data["main"]["humidity"]
+                desc = data["weather"][0]["description"]
+                wind_speed = data["wind"]["speed"]
 
-            result = f"🌤️ Weather in {city.title()}:\nTemperature: {temp}°C\nHumidity: {humidity}%\nDescription: {desc.title()}\nWind Speed: {wind_speed} m/s"
-        else:
-            result = f"Error: {data['message'].capitalize()}"
+                result = (
+                    f"🌤️ Weather in {city.title()}:\n"
+                    f"Temperature: {temp}°C\n"
+                    f"Humidity: {humidity}%\n"
+                    f"Description: {desc.title()}\n"
+                    f"Wind Speed: {wind_speed} m/s"
+                )
+            else:
+                result = f"Error: {data['message'].capitalize()}"
 
-    except Exception as e:
-        result = f"Error: {e}"
+        except Exception as e:
+            result = f"Error: {e}"
 
     result_label.config(text=result)
 
